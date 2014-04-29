@@ -20,6 +20,8 @@ public:
     ~FluushOption();
 
     virtual void closeEvent(QCloseEvent *e);
+    void loadSettings();
+    void saveSettings();
 
 public slots:
     void sysTrayActivated(QSystemTrayIcon::ActivationReason r);
@@ -28,6 +30,7 @@ public slots:
     void uploadProgress(qint64 sent, qint64 total);
     void done();
 
+    void quit();
 private:
 
     QSystemTrayIcon *trayIcon;

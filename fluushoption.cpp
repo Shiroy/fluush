@@ -15,6 +15,7 @@
 #include <QProgressDialog>
 #include <QMessageBox>
 #include <QClipboard>
+#include <QSettings>
 
 FluushOption::FluushOption(QWidget *parent) :
     QDialog(parent),
@@ -23,14 +24,22 @@ FluushOption::FluushOption(QWidget *parent) :
     ui->setupUi(this);
 
     QMenu *contextMenu = new QMenu(this);
-    QAction *showMe, *quit;
+    QAction *takeFullScreen, *showMe, *quit;
+
+    takeFullScreen = new QAction(tr("Take the full screen"), this);
+    takeFullScreen->setCheckable(true);
+    takeFullScreen->setChecked(ui->full_screen->isChecked());
+    connect(takeFullScreen, SIGNAL(toggled(bool)), ui->full_screen, SLOT(setChecked(bool)));
+    connect(ui->full_screen, SIGNAL(toggled(bool)), takeFullScreen, SLOT(setChecked(bool)));
 
     showMe = new QAction(tr("Show options"), this);
     connect(showMe, SIGNAL(triggered()), this, SLOT(show()));
 
     quit = new QAction(tr("Quit"), this);
-    connect(quit, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(quit, SIGNAL(triggered()), this, SLOT(quit()));
 
+    contextMenu->addAction(takeFullScreen);
+    contextMenu->addSeparator();
     contextMenu->addAction(showMe);
     contextMenu->addAction(quit);
 
@@ -46,6 +55,7 @@ FluushOption::FluushOption(QWidget *parent) :
     dia->hide();
     dia->setAutoReset(false);
     dia->setAutoClose(false);
+    loadSettings();
 }
 
 FluushOption::~FluushOption()
@@ -76,8 +86,31 @@ void FluushOption::sysTrayActivated(QSystemTrayIcon::ActivationReason r)
 
 void FluushOption::closeEvent(QCloseEvent *e)
 {
+    saveSettings();
     hide();
     e->ignore();
+}
+
+void FluushOption::loadSettings()
+{
+    QSettings set("Shiroy", "Fluush", this);
+    ui->apiKey->setText(set.value("apiKey", "").toString());
+    ui->full_screen->setChecked(set.value("fullScreen", false).toBool());
+    ui->hideThis->setChecked(set.value("hideThis", true).toBool());
+}
+
+void FluushOption::saveSettings()
+{
+    QSettings set("Shiroy", "Fluush", this);
+    set.setValue("apiKey", ui->apiKey->text());
+    set.setValue("fullScreen", ui->full_screen->isChecked());
+    set.setValue("hideThis", ui->hideThis->isChecked());
+}
+
+void FluushOption::quit()
+{
+    saveSettings();
+    qApp->quit();
 }
 
 void FluushOption::imageCaptured(QPixmap p)

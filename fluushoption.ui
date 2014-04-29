@@ -43,7 +43,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="flull_screen">
+    <widget class="QCheckBox" name="full_screen">
      <property name="text">
       <string>Take the full screen</string>
      </property>
