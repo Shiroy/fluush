@@ -69,14 +69,18 @@ void FluushOption::sysTrayActivated(QSystemTrayIcon::ActivationReason r)
     case QSystemTrayIcon::Trigger:
     {
         //If we click on the system tray icon, we'll take a screenshot
-        /*if(ui->hideThis->isChecked() && isVisible())
-            hide();*/
+        if(ui->hideThis->isChecked() && isVisible())
+            hide();
 
         QPixmap screenshot = QApplication::screens().first()->grabWindow(QApplication::desktop()->winId());
-        screenshot.save("essai.png");
-        ScreenShotRestriction *rest = new ScreenShotRestriction(screenshot, this);
-        rest->showFullScreen();
-        connect(rest, SIGNAL(imageCaptured(QPixmap)), this, SLOT(imageCaptured(QPixmap)));
+        if(ui->full_screen->isChecked())
+            imageCaptured(screenshot);
+        else
+        {
+            ScreenShotRestriction *rest = new ScreenShotRestriction(screenshot, this);
+            rest->showFullScreen();
+            connect(rest, SIGNAL(imageCaptured(QPixmap)), this, SLOT(imageCaptured(QPixmap)));
+        }
         break;
     }
     default:
@@ -179,7 +183,7 @@ void FluushOption::done()
             QMessageBox::warning(this, tr("Upload faillure"), "Failed to upload to puush");
         else
         {
-            trayIcon->showMessage(tr("Upload success"), lst[1]);
+            trayIcon->showMessage(tr("Upload success"), lst[1]+"\nThis URL have been copied to the clipboard");
             ui->history->appendPlainText(lst[1]+"\n");
             QApplication::clipboard()->setText(lst[1]);
         }
