@@ -152,6 +152,7 @@ void FluushOption::imageCaptured(QPixmap p)
     postData->append(image);
 
     QNetworkReply *rep = mgr->post(push, postData);
+    f->setParent(rep);
     connect(rep, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(uploadProgress(qint64,qint64)));
     connect(rep, SIGNAL(finished()), this, SLOT(done()));
     connect(dia, SIGNAL(canceled()), rep, SLOT(abort()));
