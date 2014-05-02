@@ -14,12 +14,16 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         fluushoption.cpp \
-    screenshotrestriction.cpp
+    screenshotrestriction.cpp \
+    fluushnetwork.cpp
 
 HEADERS  += fluushoption.h \
-    screenshotrestriction.h
+    screenshotrestriction.h \
+    fluushnetwork.h
 
 FORMS    += fluushoption.ui
+
+TRANSLATIONS = fluush_fr.ts
 
 RESOURCES += \
     ressources.qrc

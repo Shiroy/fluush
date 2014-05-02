@@ -184,7 +184,7 @@ void FluushOption::done()
             QMessageBox::warning(this, tr("Upload faillure"), "Failed to upload to puush");
         else
         {
-            trayIcon->showMessage(tr("Upload success"), lst[1]+"\nThis URL have been copied to the clipboard");
+            trayIcon->showMessage(tr("Upload success"), lst[1]+tr("\nThis URL have been copied to the clipboard"));
             ui->history->appendPlainText(lst[1]+"\n");
             QApplication::clipboard()->setText(lst[1]);
         }
