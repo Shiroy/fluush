@@ -3,6 +3,7 @@
 #include "fluushrequestthumbnail.h"
 #include <QFileInfo>
 #include <QDir>
+#include <QDesktopServices>
 
 ThumbWidget::ThumbWidget(const QString &apiKey, const QString& id,const QString& url, const QString &name, FluushNetwork* const net, QWidget *parent) :
     QWidget(parent),
@@ -44,4 +45,9 @@ void ThumbWidget::thumAvailable()
         ui->miniature->setText("");
         ui->miniature->setPixmap(QPixmap(m_thumb_filename));
     }
+}
+
+void ThumbWidget::mouseDoubleClickEvent(QMouseEvent *)
+{
+    QDesktopServices::openUrl(QUrl(m_url));
 }

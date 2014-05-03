@@ -21,6 +21,8 @@ public:
     const QString& getUrl() const { return m_url; }
     const QString& getName() const { return m_name; }
 
+    void mouseDoubleClickEvent(QMouseEvent*);
+
 public slots:
     void thumAvailable();
 
