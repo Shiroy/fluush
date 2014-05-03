@@ -53,7 +53,7 @@ FluushOption::FluushOption(QWidget *parent) :
     net = new FluushNetwork(this);
 
     dia = new QProgressDialog(tr("Uploading to puush"), tr("Cancel"), 0, 100, this);
-    dia->hide();
+    dia->setVisible(false);
     dia->setAutoReset(false);
     dia->setAutoClose(false);
 
