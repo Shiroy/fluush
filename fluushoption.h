@@ -7,6 +7,8 @@
 #include <QNetworkAccessManager>
 #include <QProgressDialog>
 
+#include "fluushnetwork.h"
+
 namespace Ui {
 class FluushOption;
 }
@@ -28,7 +30,8 @@ public slots:
     void imageCaptured(QPixmap p);
 
     void uploadProgress(qint64 sent, qint64 total);
-    void done();
+    void requestError(const QString& msg);
+    void uploadComplete(const QString& url);
 
     void quit();
 private:
@@ -36,8 +39,9 @@ private:
     QSystemTrayIcon *trayIcon;
 
     Ui::FluushOption *ui;
-    QNetworkAccessManager *mgr;
     QProgressDialog *dia;
+
+    FluushNetwork *net;
 };
 
 #endif // FLUUSHOPTION_H

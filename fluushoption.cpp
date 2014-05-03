@@ -1,6 +1,7 @@
 #include "fluushoption.h"
 #include "ui_fluushoption.h"
 #include "screenshotrestriction.h"
+#include "fluushrequestupload.h"
 #include <QSystemTrayIcon>
 #include <QCloseEvent>
 #include <QMenu>
@@ -10,8 +11,6 @@
 #include <QDesktopWidget>
 #include <QDateTime>
 #include <QDir>
-#include <QHttpMultiPart>
-#include <QNetworkReply>
 #include <QProgressDialog>
 #include <QMessageBox>
 #include <QClipboard>
@@ -49,12 +48,17 @@ FluushOption::FluushOption(QWidget *parent) :
     trayIcon->setToolTip(tr("Fluush - Right click to configure"));
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(sysTrayActivated(QSystemTrayIcon::ActivationReason)));
 
-    mgr = new QNetworkAccessManager(this);
+    net = new FluushNetwork(this);
 
     dia = new QProgressDialog(tr("Uploading to puush"), tr("Cancel"), 0, 100, this);
     dia->hide();
     dia->setAutoReset(false);
     dia->setAutoClose(false);
+
+    connect(net, SIGNAL(showProgress()), dia, SLOT(show()));
+    connect(net, SIGNAL(hideProgress()), dia, SLOT(hide()));
+    connect(net, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(uploadProgress(qint64,qint64)));
+
     loadSettings();
 }
 
@@ -122,44 +126,11 @@ void FluushOption::imageCaptured(QPixmap p)
     QString savePath = QDir::tempPath() + "/" + QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss") + ".png";
     p.save(savePath);
 
-    QNetworkRequest push(QUrl("https://puush.me/api/up"));
+    FluushRequestUpload *upRequest = new FluushRequestUpload(savePath, ui->apiKey->text(), net);
+    net->sendMessage(upRequest);
 
-    QHttpMultiPart *postData = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-
-    QHttpPart apiKey;
-    apiKey.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"k\""));
-    apiKey.setBody(QByteArray().append(ui->apiKey->text()));
-
-    QHttpPart poop;
-    poop.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"z\""));
-    poop.setBody("poop");
-
-    QHttpPart image;
-    image.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"f\"; filename=\""+ savePath + "\""));
-    image.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
-    QFile *f = new QFile(savePath);
-    if(!f->open(QIODevice::ReadOnly))
-    {
-        delete postData;
-        delete f;
-        return;
-    }
-    image.setBodyDevice(f);
-
-
-    postData->append(apiKey);
-    postData->append(poop);
-    postData->append(image);
-
-    QNetworkReply *rep = mgr->post(push, postData);
-    f->setParent(rep);
-    connect(rep, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(uploadProgress(qint64,qint64)));
-    connect(rep, SIGNAL(finished()), this, SLOT(done()));
-    connect(dia, SIGNAL(canceled()), rep, SLOT(abort()));
-
-    dia->show();
-    dia->setLabelText(tr("Uploading to puush"));
-    dia->setValue(0);
+    connect(upRequest, SIGNAL(uploadSuccess(QString)), this, SLOT(uploadComplete(QString)));
+    connect(upRequest, SIGNAL(requestFailed(QString)), this, SLOT(requestError(QString)));
 }
 
 void FluushOption::uploadProgress(qint64 sent, qint64 total)
@@ -171,22 +142,14 @@ void FluushOption::uploadProgress(qint64 sent, qint64 total)
         dia->setLabelText(tr("Waiting for puush response"));
 }
 
-void FluushOption::done()
+void FluushOption::uploadComplete(const QString &url)
 {
-    dia->hide();
+    trayIcon->showMessage(tr("Upload success"), url+tr("\nThis URL have been copied to the clipboard"));
+    ui->history->appendPlainText(url);
+    QApplication::clipboard()->setText(url);
+}
 
-    QNetworkReply *rep = qobject_cast<QNetworkReply*>(sender());
-    if(rep)
-    {
-        QString repStr = rep->readAll();
-        QStringList lst = repStr.split(",");
-        if(lst[0] != "0")
-            QMessageBox::warning(this, tr("Upload faillure"), "Failed to upload to puush");
-        else
-        {
-            trayIcon->showMessage(tr("Upload success"), lst[1]+tr("\nThis URL have been copied to the clipboard"));
-            ui->history->appendPlainText(lst[1]+"\n");
-            QApplication::clipboard()->setText(lst[1]);
-        }
-    }
+void FluushOption::requestError(const QString &msg)
+{
+    QMessageBox::warning(this, tr("Request faillure"), msg);
 }

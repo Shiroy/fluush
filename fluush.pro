@@ -15,11 +15,15 @@ TEMPLATE = app
 SOURCES += main.cpp\
         fluushoption.cpp \
     screenshotrestriction.cpp \
-    fluushnetwork.cpp
+    fluushnetwork.cpp \
+    fluushnetworkrequest.cpp \
+    fluushrequestupload.cpp
 
 HEADERS  += fluushoption.h \
     screenshotrestriction.h \
-    fluushnetwork.h
+    fluushnetwork.h \
+    fluushnetworkrequest.h \
+    fluushrequestupload.h
 
 FORMS    += fluushoption.ui
 
