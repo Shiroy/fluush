@@ -37,6 +37,7 @@ void FluushRequestThumbnail::ResponseReceived(QNetworkReply *rep)
         return;
 
     f.write(data);
+    f.close();
 
     emit thumbAvailable();
 }
