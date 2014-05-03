@@ -6,8 +6,11 @@
 #include <QPixmap>
 #include <QNetworkAccessManager>
 #include <QProgressDialog>
+#include <QList>
 
 #include "fluushnetwork.h"
+
+class FluushFileInfo;
 
 namespace Ui {
 class FluushOption;
@@ -25,6 +28,8 @@ public:
     void loadSettings();
     void saveSettings();
 
+    void showEvent(QShowEvent *e);
+
 public slots:
     void sysTrayActivated(QSystemTrayIcon::ActivationReason r);
     void imageCaptured(QPixmap p);
@@ -32,6 +37,8 @@ public slots:
     void uploadProgress(qint64 sent, qint64 total);
     void requestError(const QString& msg);
     void uploadComplete(const QString& url);
+
+    void FileListSent(QList<FluushFileInfo> &list);
 
     void quit();
 private:

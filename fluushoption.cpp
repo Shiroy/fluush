@@ -2,6 +2,8 @@
 #include "ui_fluushoption.h"
 #include "screenshotrestriction.h"
 #include "fluushrequestupload.h"
+#include "fluushrequesthistory.h"
+#include "thumbwidget.h"
 #include <QSystemTrayIcon>
 #include <QCloseEvent>
 #include <QMenu>
@@ -140,16 +142,47 @@ void FluushOption::uploadProgress(qint64 sent, qint64 total)
 
     if(total == sent)
         dia->setLabelText(tr("Waiting for puush response"));
+    else
+        dia->setLabelText(tr("Sending to puush"));
 }
 
 void FluushOption::uploadComplete(const QString &url)
 {
     trayIcon->showMessage(tr("Upload success"), url+tr("\nThis URL have been copied to the clipboard"));
-    ui->history->appendPlainText(url);
+    //ui->history->appendPlainText(url);
     QApplication::clipboard()->setText(url);
 }
 
 void FluushOption::requestError(const QString &msg)
 {
     QMessageBox::warning(this, tr("Request faillure"), msg);
+}
+
+void FluushOption::showEvent(QShowEvent *e)
+{
+    Q_UNUSED(e)
+
+    FluushRequestHistory *histRequest = new FluushRequestHistory(ui->apiKey->text(), net);
+    net->sendMessage(histRequest);
+
+    connect(histRequest, SIGNAL(FileListSent(QList<FluushFileInfo>&)), this, SLOT(FileListSent(QList<FluushFileInfo>&)));
+    connect(histRequest, SIGNAL(requestFailed(QString)), this, SLOT(requestError(QString)));
+}
+
+void FluushOption::FileListSent(QList<FluushFileInfo> &list)
+{
+    QVBoxLayout *lay = ui->history;
+
+    for(int i  = 0 ; i < lay->count() ; i++)
+    {
+        QWidget* it = lay->itemAt(i)->widget();
+        lay->removeWidget(it);
+        it->deleteLater();
+    }
+
+    for(QList<FluushFileInfo>::iterator i = list.begin() ; i != list.end() ; i++)
+    {
+        ThumbWidget *wid= new ThumbWidget(ui->apiKey->text(), (*i).id, (*i).url, (*i).name, net, this);
+        lay->addWidget(wid);
+    }
 }

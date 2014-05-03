@@ -19,7 +19,9 @@ void FluushNetwork::sendMessage(FluushNetworkRequest *msg)
 
     QNetworkReply *rep = m_netManager->post(req, postData);
 
-    emit showProgress();
+    if(msg->ProgressShown())
+        emit showProgress();
+
     emit uploadProgress(0, 100);
 
     connect(rep, SIGNAL(finished()), msg, SLOT(finished()));

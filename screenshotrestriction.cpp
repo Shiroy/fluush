@@ -25,6 +25,7 @@ void ScreenShotRestriction::keyPressEvent(QKeyEvent *e)
 
 void ScreenShotRestriction::paintEvent(QPaintEvent *e)
 {
+    Q_UNUSED(e)
     QPainter paint(this);
 
     paint.drawPixmap(QPoint(0, 0), screen);
@@ -55,5 +56,6 @@ void ScreenShotRestriction::mouseMoveEvent(QMouseEvent *e)
 
 void ScreenShotRestriction::mouseReleaseEvent(QMouseEvent *e)
 {
+    Q_UNUSED(e)
     origin = QPoint(-1, -1);
 }

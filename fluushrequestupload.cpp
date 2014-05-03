@@ -1,38 +1,24 @@
 #include "fluushrequestupload.h"
 #include <QFile>
 
-FluushRequestUpload::FluushRequestUpload(const QString& file, const QString &apiKey, QObject *parent) : FluushNetworkRequest(apiKey, parent), fileToUpload(file)
+FluushRequestUpload::FluushRequestUpload(const QString& file, const QString &apiKey, QObject *parent) : FluushNetworkRequest(true, apiKey, parent), fileToUpload(file)
 {
+    SetProgressShown(true);
 }
-
-
 
 bool FluushRequestUpload::Prepare(QNetworkRequest &request, QHttpMultiPart *postData)
 {
     request.setUrl(QUrl("https://puush.me/api/up"));
 
     QHttpPart apiKey;
-    apiKey.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"k\""));
-    apiKey.setBody(QByteArray().append(m_apiKey));
-    qDebug("Api KEY : %s", m_apiKey.toStdString().c_str());
+    postValue(apiKey, "k", m_apiKey);
 
     QHttpPart poop;
-    poop.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"z\""));
-    poop.setBody("poop");
+    postValue(poop, "z", "poop");
 
     QHttpPart image;
-    image.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"f\"; filename=\""+ fileToUpload + "\""));
-    qDebug("Uploading : %s", fileToUpload.toStdString().c_str());
-    image.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
-
-    QFile *f = new QFile(fileToUpload, this);
-    if(!f->open(QIODevice::ReadOnly))
-    {
-        delete f;
+    if(!postFile(image, "f", fileToUpload))
         return false;
-    }
-    image.setBodyDevice(f);
-
 
     postData->append(apiKey);
     postData->append(poop);

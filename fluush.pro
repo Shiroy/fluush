@@ -11,21 +11,29 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = fluush
 TEMPLATE = app
 
+QMAKE_CXXFLAGS = -std=c++11
 
 SOURCES += main.cpp\
         fluushoption.cpp \
     screenshotrestriction.cpp \
     fluushnetwork.cpp \
     fluushnetworkrequest.cpp \
-    fluushrequestupload.cpp
+    fluushrequestupload.cpp \
+    thumbwidget.cpp \
+    fluushrequesthistory.cpp \
+    fluushrequestthumbnail.cpp
 
 HEADERS  += fluushoption.h \
     screenshotrestriction.h \
     fluushnetwork.h \
     fluushnetworkrequest.h \
-    fluushrequestupload.h
+    fluushrequestupload.h \
+    thumbwidget.h \
+    fluushrequesthistory.h \
+    fluushrequestthumbnail.h
 
-FORMS    += fluushoption.ui
+FORMS    += fluushoption.ui \
+    thumbwidget.ui
 
 TRANSLATIONS = fluush_fr.ts
 
